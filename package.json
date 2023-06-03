@@ -1,0 +1,53 @@
+{
+  "name": "multiindex",
+  "version": "0.0.1",
+  "description": " Flexible in-memory document database-like manual index management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "c8 --reporter=none --verbose -- node --loader tsx --no-warnings --test-reporter spec --test src/*.test.ts src/**/*.test.ts",
+    "test:watch": "node --watch --loader tsx --no-warnings --test-reporter spec --test src/*.test.ts src/**/*.test.ts",
+    "coverage": "c8 report --reporter html --reporter text",
+    "docs": "typedoc ./src/index.ts",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utdemir/multiindex.git"
+  },
+  "keywords": [
+    "search",
+    "db",
+    "browser",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Utku Demir",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/utdemir/multiindex/issues"
+  },
+  "homepage": "https://github.com/utdemir/multiindex#readme",
+  "dependencies": {
+    "long": "^5.2.3",
+    "sorted-btree": "^1.8.1",
+    "type-fest": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "c8": "^7.14.0",
+    "fast-check": "^3.9.0",
+    "jsdoc": "^4.0.2",
+    "tsx": "^3.12.7",
+    "typedoc": "^0.24.7",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=3",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm"
+  }
+}
