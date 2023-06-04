@@ -37,10 +37,52 @@ export class LongMap<T> {
     }
 
     forEach(cb: (value: T, key: Long) => void) {
-        this.map.forEach((m, high) => 
-            m.forEach((value, low) => 
-                cb(value, Long.fromBits(low, high))
-            )
-        )
+        for(const [id, v] of this.entries()) {
+            cb(v, id)
+        }
+    }
+
+    *entries(): Generator<[Long, T], void, unknown> {
+        for(const [high, m] of this.map.entries()) {
+            for(const [low, value] of m.entries()) {
+                yield [Long.fromBits(low, high, true), value] as [Long, T]
+            }
+        }
+    }
+}
+
+export class LongSet {
+    private inner: LongMap<null> = new LongMap()
+
+    static singleton(value: Long): LongSet {
+        const set = new LongSet()
+        set.set(value)
+        return set
+    }
+
+    set(value: Long) {
+        this.inner.set(value, null)
+    }
+
+    delete(value: Long) {
+        this.inner.delete(value)
+    }
+
+    has(value: Long): boolean {
+        return this.inner.get(value) !== undefined
+    }
+
+    empty(): boolean {
+        return this.inner.empty()
+    }
+
+    forEach(cb: (value: Long) => void) {
+        this.inner.forEach((_, key) => cb(key))
+    }
+
+    *values(): Generator<Long, void, unknown> {
+        for(const [id] of this.inner.entries()) {
+            yield id
+        }
     }
 }

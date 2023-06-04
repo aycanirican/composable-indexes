@@ -2,97 +2,58 @@ import fc from "fast-check";
 import { Collection, Id, Index, UnregisteredIndex } from "../Collection";
 import { Call, arbCalls } from "./arbitraries";
 import { deepStrictEqual } from "assert";
-import Long from "long";
 import { MockIndex } from "./MockIndex";
 
-interface Impl<T> {
-    add(value: T): void;
-    set(id: Id, value: T): void;
-    delete(id: Id): void;
-    toList(): [Id, T][];
-}   
-
-export class Reference<T> implements Impl<T> {
-    private elems: [Id, T][] = []
-    add(value: T) {
-        for(let i=Long.UZERO;; i=i.add(1)) {
-            if(this.elems.every(([j, _]) => i.notEquals(j))) {
-                this.elems.push([i, value])
-                return i
-            }
-        }            
+export function playCalls<T>(f: Collection<T>, arr: Call<T>[]) {
+  for (const call of arr) {
+    switch (call.type) {
+      case "add":
+        f.add(call.value);
+        break;
+      case "set":
+        f.set(call.id, call.value);
+        break;
+      case "delete":
+        f.delete(call.id);
+        break;
     }
-
-    set(id: Id, value: T): void {
-        this.delete(id)
-        this.elems.push([id, value])
-    }
-    delete(id: Id): void {
-        this.elems = this.elems.filter(([i, _]) => i.notEquals(id))
-    }
-    toList(): [Id, T][] {
-        return this.elems
-    }
+  }
 }
 
-export function playCalls<T, C extends Impl<T>>(f: C, arr: Call<T>[]) {
-    for(const call of arr) {
-        switch(call.type) {
-            case "add":
-                f.add(call.value)
-                break;
-            case "set":
-                f.set(call.id, call.value)
-                break;
-            case "delete":
-                f.delete(call.id)
-                break;
-        }
+export function propIndexAgainstReference<
+  T,
+  Ix extends Index<T, T>,
+  Ret
+>(args: {
+  valueGen: fc.Arbitrary<T>;
+  index: UnregisteredIndex<T, T, Ix>;
+  value: (ix: Ix) => Ret;
+  reference: (arrs: Item<T>[]) => Ret;
+  examples?: [calls: Call<T>[]][];
+}): fc.IPropertyWithHooks<[ctx: fc.ContextValue, calls: Call<T>[]]> {
+  return fc.property(
+    fc.context(),
+    arbCalls({
+      value: args.valueGen,
+      idRange: 10,
+      maxLength: 100,
+    }),
+    (ctx, calls) => {
+      const col = new Collection<T>();
+
+      const ix = col.registerIndex(args.index);
+      const mockIx = col.registerIndex(MockIndex.create());
+
+      playCalls(col, calls);
+
+      ctx.log(`Updates: ${JSON.stringify(mockIx.collectedUpdates)}`)
+
+      const outList = mockIx.toOutList();
+      ctx.log(`OutList: ${JSON.stringify(outList)}`)
+
+      const expected = args.reference(outList);
+      const actual = args.value(ix);
+      deepStrictEqual(actual, expected);
     }
-}
-
-export function runCalls<T>(arr: Call<T>[]): [Id, T][] {
-    const f = new Reference<T>()
-    playCalls(f, arr)
-    return f.toList()
-}
-
-export function assertIndexAgainstReference<T, Ix extends Index<T, T>, Ret>(args: {
-    valueGen: fc.Arbitrary<T>,
-    index: UnregisteredIndex<T, T, Ix>,
-    value: (ix: Ix) => Ret,
-    reference: (arrs: [Id, T][]) => Ret,
-    examples?: [calls: Call<T>[]][]
-}): void {
-    return fc.assert(
-        fc.property(
-            arbCalls({
-                value: args.valueGen,
-                idRange: 10,
-                maxLength: 100
-            }),
-            (calls) => {
-                console.log("---")
-                const col = new Collection<T>()
-
-                const ix = col.registerIndex(args.index)
-                const mockIx = col.registerIndex(MockIndex.create())
-
-                console.log("calls", calls)
-                playCalls(col, calls)
-                console.log("updates", mockIx.collectedUpdates)
-
-                const actual = args.value(ix)
-
-                const expected = args.reference(runCalls(calls))
-
-                deepStrictEqual(actual, expected)
-                console.log("good.")
-            }
-        ),
-        {
-            numRuns: 1000000,
-            examples: args.examples
-        }
-    )
+  )
 }

@@ -8,7 +8,7 @@ export function arbId(range: number): fc.Arbitrary<Id> {
       min: 0,
       max: range,
     })
-    .map((n) => Long.fromNumber(n));
+    .map((n) => Long.fromNumber(n, true));
 }
 
 export type Call<T> =

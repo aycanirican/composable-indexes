@@ -8,10 +8,10 @@ import {
   Update,
   UpdateType,
 } from "../Collection";
-import { unreachable } from "../util";
+import { LongSet, unreachable } from "../util";
 
 export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
-  private readonly ix: Map<In, Set<Id>> = new Map();
+  private readonly ix: Map<In, LongSet> = new Map();
 
   private constructor(ctx: IndexContext<Out>) {
     super(ctx);
@@ -23,7 +23,6 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
 
   _onUpdate(update: Update<In>): () => void {
     return () => {
-      console.log("HashIndex._onUpdate", update)
       if (update.type === UpdateType.ADD) {
         this.add(update.id, update.value);
       } else if (update.type === UpdateType.UPDATE) {
@@ -33,17 +32,17 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
       } else {
         unreachable(update);
       }
-
-      console.log("HashIndex.debug", inspect(this.ix))
     };
   }
 
   private add(id: Id, value: In): void {
     const set = this.ix.get(value);
     if (set) {
-      set.add(id);
+      set.set(id);
     } else {
-      this.ix.set(value, new Set([id]));
+      const s = new LongSet();
+      s.set(id);
+      this.ix.set(value, s);
     }
   }
 
@@ -56,7 +55,7 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   private delete(id: Id, oldValue: In): void {
     const set = this.ix.get(oldValue);
     set!.delete(id);
-    if (set && set.size === 0) {
+    if (set && set.empty()) {
       this.ix.delete(oldValue);
     }
   }
@@ -71,14 +70,14 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   }
 
   // Utils
-  private items(set: Set<Id> | undefined): Item<Out>[] {
+  private items(set: LongSet | undefined): Item<Out>[] {
     const ret: Item<Out>[] = [];
 
     if (!set) return ret;
-
-    for (const id of set) {
+    set.forEach((id) => {
       ret.push(this.item(id));
-    }
+    });
+
     return ret;
   }
 }

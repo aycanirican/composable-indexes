@@ -7,18 +7,14 @@ import {
   Update,
   UpdateType,
 } from "../Collection";
-import { unreachable } from "../util";
+import { LongSet, unreachable } from "../util";
 
 // Workaround for https://github.com/qwertie/btree-typescript/issues/35
 import BTree_ from "sorted-btree";
 const BTree = (BTree_ as any).default as typeof BTree_;
 
 export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> {
-  private readonly ix = new BTree<number | string, Set<Id>>();
-
-  private constructor(ctx: IndexContext<Out>) {
-    super(ctx);
-  }
+  private readonly ix = new BTree<number | string, LongSet>();
 
   static create<In extends number | string, Out>(): UnregisteredIndex<In, Out, BTreeIndex<In, Out>> {
     return (ctx) => new BTreeIndex(ctx);
@@ -41,22 +37,22 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   private add(id: Id, value: In): void {
     const set = this.ix.get(value);
     if (set !== undefined) {
-      set.add(id);
+      set.set(id);
     } else {
-      this.ix.set(value, new Set([id]));
+      this.ix.set(value, LongSet.singleton(id));
     }
   }
 
   private update(id: Id, oldValue: In, newValue: In): void {
-    const oldSet = this.ix.get(oldValue);
-    oldSet?.delete(id);
+    // TODO: Lot's of redundant checks here, implement this more efficiently.
+    this.delete(id, oldValue);
     this.add(id, newValue);
   }
 
   private delete(id: Id, oldValue: In): void {
     const set = this.ix.get(oldValue);
     set?.delete(id);
-    if (set && set.size === 0) {
+    if (set && set.empty()) {
       this.ix.delete(oldValue);
     }
   }
@@ -72,22 +68,32 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
 
   max(): Item<Out>[] {
     const maxKey = this.ix.maxKey();
-    return this.items(maxKey ? this.ix.get(maxKey): undefined)
+    if(maxKey === undefined) return []
+    return this.items(this.ix.get(maxKey))
   }
 
   min(): Item<Out>[] {
     const minKey = this.ix.minKey();
-    return this.items(minKey ? this.ix.get(minKey): undefined)
+    if(minKey === undefined) return []
+    return this.items(this.ix.get(minKey))
   }
 
   max1(): Item<Out> | undefined {
     const maxKey = this.ix.maxKey();
-    return maxKey ? this.item(this.ix.get(maxKey)?.values().next().value) : undefined;
+    if(maxKey === undefined) return
+    const maxValues = this.ix.get(maxKey);
+    for(const id of maxValues!.values()) {
+      return this.item(id);
+    }
   }
 
   min1(): Item<Out> | undefined {
     const minKey = this.ix.minKey();
-    return minKey ? this.item(this.ix.get(minKey)?.values().next().value) : undefined;
+    if(minKey === undefined) return
+    const minValues = this.ix.get(minKey);
+    for(const id of minValues!.values()) {
+      return this.item(id);
+    }
   }
 
   range(p: { minValue: In; maxValue: In; limit?: number }): Item<Out>[] {
@@ -96,7 +102,7 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
 
     const ret: Item<Out>[] = [];
     for (const [_, s] of values) {
-      for (const id of s) {
+      for (const id of s.values()) {
         ret.push(this.item(id))
       }
     }
@@ -105,14 +111,15 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   }
 
   // utils
-  private items(set: Set<Id> | undefined): Item<Out>[] {
+  private items(set: LongSet | undefined): Item<Out>[] {
     const ret: Item<Out>[] = [];
 
     if(!set) return ret;
 
-    for (const id of set) {
+    set.forEach((id) => {
       ret.push(this.item(id));
-    }
+    })
+
     return ret;
   }
 }
