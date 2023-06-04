@@ -24,3 +24,30 @@ jobs:
       - run: pnpm install
       - run: pnpm run test
       - run: pnpm run coverage
+  test-examples:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.0
+
+      # build the main repo
+      - run: pnpm install
+        working-directory: composable-indexes
+      - run: pnpm build
+        working-directory: composable-indexes
+
+      # build the examples
+      - run: pnpm link ../composable-indexes
+      - run: pnpm install
+      - run: pnpm run build
+      - run: pnpm run runAll
