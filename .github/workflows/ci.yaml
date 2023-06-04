@@ -7,12 +7,14 @@ on:
 
 jobs:
   test-core:
-    - name: Test Core
-      runs-on: ubuntu-latest
-      steps:
-        - uses: pnpm/action-setup@v2
-          with:
-            version: 6.0.2
-        - run: pnpm install
-        - run: pnpm run test
-        - run: pnpm run coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Core
+        runs-on: ubuntu-latest
+        steps:
+          - uses: pnpm/action-setup@v2
+            with:
+              version: 6.0.2
+          - run: pnpm install
+          - run: pnpm run test
+          - run: pnpm run coverage
