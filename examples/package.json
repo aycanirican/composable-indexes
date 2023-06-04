@@ -4,7 +4,8 @@
   "description": "",
   "module": "commonjs",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "runAll": "set -o errexit; npm run build && for f in ./dist/*.js; do echo \": $f\"; node $f; done"
   },
   "dependencies": {
     "composable-indexes": "*"

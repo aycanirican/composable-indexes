@@ -45,20 +45,25 @@ export class GroupedIndex<In, Out, Inner extends Index<In, Out>> extends Index<
       unreachable(update);
     }
   }
-  
-  add(update: AddUpdate<In>): () => void {
-    const group = this.group(update.value);
+
+  private getOrCreateGroup(group: string | number): Inner {
     let ix = this.ixs.get(group);
     if (!ix) {
       ix = this.inner(this.ctx);
       this.ixs.set(group, ix);
     }
+    return ix
+  }
+  
+  private add(update: AddUpdate<In>): () => void {
+    const group = this.group(update.value);
+    const ix = this.getOrCreateGroup(group);
     // TODO: If the inner index throws a ConflictException, we should delete the
     // empty index.
     return ix._onUpdate(update);
   }
 
-  update(update: UpdateUpdate<In>): () => void {
+  private update(update: UpdateUpdate<In>): () => void {
     const oldGroup = this.group(update.oldValue);
     const newGroup = this.group(update.newValue);
     if (oldGroup === newGroup) {
@@ -66,7 +71,7 @@ export class GroupedIndex<In, Out, Inner extends Index<In, Out>> extends Index<
       return ix._onUpdate(update);
     } else {
       const oldIx = this.ixs.get(oldGroup)!;
-      const newIx = this.ixs.get(newGroup)!;
+      const newIx = this.getOrCreateGroup(newGroup);
       return () => {
         oldIx._onUpdate({
           id: update.id,
@@ -82,11 +87,20 @@ export class GroupedIndex<In, Out, Inner extends Index<In, Out>> extends Index<
     }
   }
 
-  delete(update: DeleteUpdate<In>): () => void {
+  private delete(update: DeleteUpdate<In>): () => void {
     const group = this.group(update.oldValue);
     const ix = this.ixs.get(group)!;
     return ix._onUpdate(update);
     // TODO: When an index becomes empty, we can delete it.
+  }
+
+  where<T>(group: string | number, getter: (ix: Inner) => T): T | undefined {
+    const ix = this.ixs.get(group);
+    if (ix) {
+      return getter(ix);
+    } else {
+      return undefined;
+    }
   }
 }
 

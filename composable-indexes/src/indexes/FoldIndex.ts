@@ -8,11 +8,11 @@ import {
 import { unreachable } from "../util";
 import { FocusedIndex, focus } from "./FocusedIndex";
 
-export class FoldIndex<In, Out, State, Return> extends Index<In, Out> {
+export class FoldIndex<In, State, Return> extends Index<In, any> {
   private state: State;
 
   private constructor(
-    ctx: IndexContext<Out>,
+    ctx: IndexContext<any>,
     init: State,
     private readonly add: (state: State, value: In) => State,
     private readonly update: (state: State, oldValue: In, newValue: In) => State,
@@ -23,13 +23,13 @@ export class FoldIndex<In, Out, State, Return> extends Index<In, Out> {
     this.state = init;
   }
 
-  static create<T, O, State, Return>(args: {
+  static create<In, State, Return>(args: {
     init: State;
-    add: (state: State, value: T) => State;
-    update: (state: State, oldValue: T, newValue: T) => State;
-    delete: (state: State, oldValue: T) => State;
+    add: (state: State, value: In) => State;
+    update: (state: State, oldValue: In, newValue: In) => State;
+    delete: (state: State, oldValue: In) => State;
     result: (state: State) => Return;
-  }): UnregisteredIndex<T, O, FoldIndex<T, O, State, Return>> {
+  }): UnregisteredIndex<In, any, FoldIndex<In, State, Return>> {
     return (ctx) =>
       new FoldIndex(
         ctx,
@@ -60,19 +60,19 @@ export class FoldIndex<In, Out, State, Return> extends Index<In, Out> {
   }
 }
 
-export function foldIndex<T, State, Return>(args: {
+export function foldIndex<In, Out, State, Return>(args: {
   init: State;
-  add: (state: State, value: T) => State;
-  update: (state: State, oldValue: T, newValue: T) => State;
-  delete: (state: State, oldValue: T) => State;
+  add: (state: State, value: In) => State;
+  update: (state: State, oldValue: In, newValue: In) => State;
+  delete: (state: State, oldValue: In) => State;
   result: (state: State) => Return;
-}): UnregisteredIndex<T, T, FoldIndex<T, T, State, Return>> {
+}): UnregisteredIndex<In, Out, FoldIndex<In, State, Return>> {
   return FoldIndex.create(args);
 }
 
 // Variations
 
-export type GroupIndex<State, Return> = FoldIndex<State, any, State, Return>; 
+export type GroupIndex<State, Return> = FoldIndex<State, State, Return>; 
 
 export function groupIndex<State, Return>(args: {
   empty: State;

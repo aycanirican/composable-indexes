@@ -1,9 +1,9 @@
 import test from "node:test";
-import fc from "fast-check";
+import { deepStrictEqual } from "node:assert";
 
+import fc from "fast-check";
 import { LongMap } from "./LongMap";
 import Long from "long";
-import { deepStrictEqual } from "node:assert";
 
 test("LongMap", async (t) => {
   await test("ref", () => {

@@ -80,6 +80,6 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   }
 }
 
-export function hashIndex<T extends string | number>(): UnregisteredIndex<T, T, HashIndex<T, T>> {
+export function hashIndex<T extends string | number, O>(): UnregisteredIndex<T, O, HashIndex<T, O>> {
   return HashIndex.create();
 }
