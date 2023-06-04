@@ -20,7 +20,7 @@ jobs:
           node-version: 20
       - uses: pnpm/action-setup@v2
         with:
-          version: 6.0.2
+          version: 8.6.0
       - run: pnpm install
       - run: pnpm run test
       - run: pnpm run coverage
