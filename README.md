@@ -1,3 +1,2 @@
-# multiindex
+# composable-indexes
 
-Type-safe, 

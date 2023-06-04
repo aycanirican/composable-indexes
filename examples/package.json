@@ -1,0 +1,17 @@
+{
+  "name": "composable-indexes-examples",
+  "version": "1.0.0",
+  "description": "",
+  "module": "commonjs",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "composable-indexes": "*"
+  },
+  "author": "Utku Demir",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  }
+}

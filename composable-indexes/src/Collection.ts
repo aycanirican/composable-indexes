@@ -142,23 +142,26 @@ export enum UpdateType {
   DELETE,
 }
 
-export type Update<T> =
-  | {
-      readonly type: UpdateType.ADD;
-      readonly id: Id;
-      readonly value: T;
-    }
-  | {
-      readonly type: UpdateType.UPDATE;
-      readonly id: Id;
-      readonly oldValue: T;
-      readonly newValue: T;
-    }
-  | {
-      readonly type: UpdateType.DELETE;
-      readonly id: Id;
-      readonly oldValue: T;
-    };
+export type AddUpdate<T> = {
+  readonly type: UpdateType.ADD;
+  readonly id: Id;
+  readonly value: T;
+};
+
+export type UpdateUpdate<T> = {
+  readonly type: UpdateType.UPDATE;
+  readonly id: Id;
+  readonly oldValue: T;
+  readonly newValue: T;
+};
+
+export type DeleteUpdate<T> = {
+  readonly type: UpdateType.DELETE;
+  readonly id: Id; 
+  readonly oldValue: T;
+};
+
+export type Update<T> = AddUpdate<T> | UpdateUpdate<T> | DeleteUpdate<T>;
 
 export abstract class Index<In, Out> {
   protected constructor(readonly indexContext: IndexContext<Out>) {}
@@ -188,13 +191,13 @@ export class ConflictException<Out, Ix extends Index<any, Out>> extends Error {
   existingValue: Out
 
   constructor(readonly existingId: Id, readonly index: Ix) {
-    super(`multiindex: Conflict with existing id ${existingId}`);
+    super(`composable-indexes: Conflict with existing id ${existingId}`);
     this.existingValue = index.indexContext.store.get(existingId)!;
   }
 }
 
 export class ConditionFailedException<Ix extends Index<any, any>> extends Error {
   constructor(readonly message: string, readonly index: Ix) {
-    super(`multiindex: Precondition failed: ${message}`);
+    super(`composable-indexes: Precondition failed: ${message}`);
   }
 }

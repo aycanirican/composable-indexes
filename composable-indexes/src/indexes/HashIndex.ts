@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import {
   Id,
   Index,
@@ -9,7 +8,7 @@ import {
   UpdateType,
 } from "../Collection";
 import { LongSet, unreachable } from "../util";
-
+ 
 export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   private readonly ix: Map<In, LongSet> = new Map();
 
@@ -47,8 +46,7 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   }
 
   private update(id: Id, oldValue: In, newValue: In): void {
-    const oldSet = this.ix.get(oldValue);
-    oldSet?.delete(id);
+    this.delete(id, oldValue);
     this.add(id, newValue);
   }
 

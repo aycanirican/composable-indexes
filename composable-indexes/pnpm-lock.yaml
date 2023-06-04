@@ -19,6 +19,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.2.5
     version: 20.2.5
+  '@types/shuffle-seed':
+    specifier: ^1.1.0
+    version: 1.1.0
   c8:
     specifier: ^7.14.0
     version: 7.14.0
@@ -28,6 +31,9 @@ devDependencies:
   jsdoc:
     specifier: ^4.0.2
     version: 4.0.2
+  shuffle-seed:
+    specifier: ^1.1.6
+    version: 1.1.6
   tsx:
     specifier: ^3.12.7
     version: 3.12.7
@@ -339,6 +345,10 @@ packages:
 
   /@types/node@20.2.5:
     resolution: {integrity: sha512-JJulVEQXmiY9Px5axXHeYGLSjhkZEnD+MDPDGbCbIAbMslkKwmygtZFy1X6s/075Yo94sf8GuSlFfPzysQrWZQ==}
+    dev: true
+
+  /@types/shuffle-seed@1.1.0:
+    resolution: {integrity: sha512-h6UW72XuE07bSDVTkNjMMapFj6ERJmvf+RajssOoEIVhuU53/+zyCSBjBrSpDJSzVYjGr4CYxW3ABrY0C6s8qA==}
     dev: true
 
   /ansi-regex@5.0.1:
@@ -783,6 +793,10 @@ packages:
       glob: 7.2.3
     dev: true
 
+  /seedrandom@2.4.4:
+    resolution: {integrity: sha512-9A+PDmgm+2du77B5i0Ip2cxOqqHjgNxnBgglxLcX78A2D6c2rTo61z4jnVABpF4cKeDMDG+cmXXvdnqse2VqMA==}
+    dev: true
+
   /semver@6.3.0:
     resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
     hasBin: true
@@ -807,6 +821,12 @@ packages:
       jsonc-parser: 3.2.0
       vscode-oniguruma: 1.7.0
       vscode-textmate: 8.0.0
+    dev: true
+
+  /shuffle-seed@1.1.6:
+    resolution: {integrity: sha512-Vr9wlwMKJVUeFNGyc4aNbrzkI568gkve7ykyJ+1/cz78j3yRlJODWU0CuJ/fmk3MCjvAClpnqlycd/Y53UG3UA==}
+    dependencies:
+      seedrandom: 2.4.4
     dev: true
 
   /signal-exit@3.0.7:

@@ -1,4 +1,3 @@
-import Long from "long"
 import { Id, Index, Item, UnregisteredIndex, Update, UpdateType } from "../Collection"
 import { inspect } from "node:util"
 

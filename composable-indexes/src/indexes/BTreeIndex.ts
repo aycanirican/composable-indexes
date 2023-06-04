@@ -1,17 +1,13 @@
 import {
   Id,
   Index,
-  IndexContext,
   Item,
   UnregisteredIndex,
   Update,
   UpdateType,
 } from "../Collection";
 import { LongSet, unreachable } from "../util";
-
-// Workaround for https://github.com/qwertie/btree-typescript/issues/35
-import BTree_ from "sorted-btree";
-const BTree = (BTree_ as any).default as typeof BTree_;
+import BTree from "sorted-btree";
 
 export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> {
   private readonly ix = new BTree<number | string, LongSet>();

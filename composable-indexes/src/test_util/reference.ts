@@ -1,24 +1,8 @@
 import fc from "fast-check";
-import { Collection, Id, Index, UnregisteredIndex } from "../Collection";
-import { Call, arbCalls } from "./arbitraries";
+import { Collection, Index, Item, UnregisteredIndex } from "../Collection";
+import { Call, arbCalls, playCalls } from "./call";
 import { deepStrictEqual } from "assert";
 import { MockIndex } from "./MockIndex";
-
-export function playCalls<T>(f: Collection<T>, arr: Call<T>[]) {
-  for (const call of arr) {
-    switch (call.type) {
-      case "add":
-        f.add(call.value);
-        break;
-      case "set":
-        f.set(call.id, call.value);
-        break;
-      case "delete":
-        f.delete(call.id);
-        break;
-    }
-  }
-}
 
 export function propIndexAgainstReference<
   T,
@@ -48,7 +32,7 @@ export function propIndexAgainstReference<
 
       ctx.log(`Updates: ${JSON.stringify(mockIx.collectedUpdates)}`)
 
-      const outList = mockIx.toOutList();
+    const outList = mockIx.toOutList();
       ctx.log(`OutList: ${JSON.stringify(outList)}`)
 
       const expected = args.reference(outList);
@@ -57,3 +41,4 @@ export function propIndexAgainstReference<
     }
   )
 }
+

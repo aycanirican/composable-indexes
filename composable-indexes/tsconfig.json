@@ -1,11 +1,8 @@
 
 {
   "compilerOptions": {
-      "lib": [
-        "es2017",
-        "esnext.asynciterable"
-      ],
-      "target": "es2017",
+      "lib": ["es6"],
+      "target": "es6",
       "module": "commonjs",
       "moduleResolution": "node",
       "emitDecoratorMetadata": true,
@@ -22,6 +19,7 @@
       "./src/**/*.ts"
   ],
   "exclude": [
+      "./src/**/*.test.ts",
       "node_modules"
   ]
 }
