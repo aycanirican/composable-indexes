@@ -1,5 +1,7 @@
-import { Id, Index, Item, UnregisteredIndex, Update, UpdateType } from "../Collection"
+import { Id, Index, Item, UnregisteredIndex } from "../core/Index"
+
 import { inspect } from "node:util"
+import { Update, UpdateType } from "../core/Update"
 
 export class MockIndex<In, Out> extends Index<In, Out> {
     collectedUpdates: Update<In>[] = []
@@ -53,6 +55,6 @@ export class MockIndex<In, Out> extends Index<In, Out> {
     }
 
     static create<T, O>() : UnregisteredIndex<T, O, MockIndex<T, O>> {
-        return (ctx) => new MockIndex(ctx)
+        return new UnregisteredIndex((ctx) => new MockIndex(ctx))
     }
 }

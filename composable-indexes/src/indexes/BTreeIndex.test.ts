@@ -2,7 +2,7 @@ import test from "node:test";
 import { BTreeIndex, btreeIndex } from "./BTreeIndex";
 import fc from "fast-check";
 import { propIndexAgainstReference } from "../test_util/reference";
-import { Item } from "../Collection";
+import { Item } from "../core/Index";
 import { testProps } from "../test_util/invariants";
 
 test("BTreeIndex", async (t) => {

@@ -1,5 +1,6 @@
 import fc from "fast-check";
-import { Collection, Index, UnregisteredIndex } from "../Collection";
+import { Collection } from "../core/Collection";
+import { Index, UnregisteredIndex } from "../core/Index";
 import {
   Call,
   arbCallAdd,

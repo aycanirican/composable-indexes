@@ -1,0 +1,233 @@
+import Long from "long"
+import BTree from "sorted-btree";
+import { LongSet } from "./util";
+
+type Id = Long
+
+abstract class Index<Input, Queries> {
+  abstract _apply(u: Update<Input>): void
+  abstract query: Queries
+}
+
+type Query<Params extends any[], Out> 
+  = (...params: Params) => Out
+
+type BTreeIndexQueries = {
+  max: () => number
+}
+
+class BTreeIndex extends Index<number, BTreeIndexQueries> {
+  private readonly ix = new BTree<number, LongSet>()
+  override _apply(u: Update<number>) {
+    throw new Error("Method not implemented.");
+  }
+  override query: BTreeIndexQueries = {
+      max: () => 0
+  }
+}
+
+function focus<Input, InnerInput, Queries>(f: (x: Input) => InnerInput, inner: Index<InnerInput, Queries>): Index<Input, Queries> {
+  return new FocusIndex(f, inner)
+}
+
+class FocusIndex<Input, InnerInput, Queries> extends Index<Input, Queries> {
+  constructor(
+    private readonly f: (x: Input) => InnerInput,
+    private readonly inner: Index<InnerInput, Queries>
+  ) {
+    super()
+  }
+  override _apply(u: Update<Input>): void {
+    this.inner._apply(fmapUpdate(this.f, u))
+  }
+  override _queries = this.inner._queries
+}
+
+const ix = focus((x: number) => x, new BTreeIndex())
+const n = ix._queries.max()
+
+class Collection<Indexes extends { [name: string]: Index<any, any> }> {
+  constructor(options: {
+    indexes: Indexes
+  }) {}
+
+  query<Path>(query: Path): QueryTraverse<Path, Indexes> {
+    return undefined as any
+  }
+}
+
+type QueryTraverse<Path, Obj extends { [name: string]: Index<any, any> | Query<any, any> }> =
+  Path extends `${infer Name}.${infer Rest}`
+    ? Name extends keyof Obj
+      ? (
+        Obj[Name] extends Index<any, any>
+        ? QueryTraverse<Rest, Obj[Name]["_queries"]>
+        : never
+      )
+      : never
+    : Path extends keyof Obj
+      ? (Obj[Path] extends Query<any, any> ? Obj[Path] : never)
+      : never
+
+type Person = {
+  name: string,
+  age: number
+}
+
+const col = new Collection({
+  indexes: {
+    "byAge": focus((p: Person) => p.age, new BTreeIndex()),
+  }
+})
+
+const ret = col.query("byAge.max")
+
+/*
+class Collection<T, Queries, Ixs extends Indexes<T, Queries>> {
+  constructor(options: {
+    indexes: {
+      [key: string]: Index<T>
+    }
+  }) {}
+}
+
+function focus(t: any, f: any) {
+  return t
+}
+
+function btreeIndex() {
+  return undefined
+}
+
+function hashIndex() {
+  return undefined
+}
+
+// Target
+
+type Person = {
+  name: string,
+  age: number
+}
+
+new Collection<Person>({
+  indexes: {
+    ages: focus(p => p.age, btreeIndex()),
+    names: focus(p => p.name, hashIndex()),
+    byAge: group(p => p.age, focus((p) => p.name, hashIndex()))
+  }
+})
+
+/*
+
+type Id = Long
+
+type Query<Params extends any[], Out> 
+  = (...params: Params) => Out
+
+type Queries = {
+  [key: string]: Queries
+    | Query<any[], any>
+}
+
+type Index<QS extends Queries> = {
+  [K in keyof QS]: QS[K] extends Query<infer Params, infer Out> ? (...params: Params) => Out : never
+}
+
+class HashIndex<T extends string | number> implements Index< {
+  get: (_: T) => ReturnId[]
+}> {
+  get(val: T)  {
+    return []
+  }
+} 
+
+class BTreeIndex<T extends string | number> implements Index< {
+  max: () => T | undefined
+}> {
+  max() {
+    return undefined
+  }
+}
+
+// Return id handling
+
+type MapReturnIds<Value, Target> =
+  Value extends ReturnId
+    ? Target
+    : Value extends object
+      ? { [K in keyof Value]: MapReturnIds<Value[K], Target> }
+      : Value
+
+class ReturnId {
+  __INTERNAL__ReturnId: true = true
+  constructor(public id: Id) {}
+}
+
+function mapReturnIds<Value, Target>(value: Value, f: (_: ReturnId) => Target): MapReturnIds<Value, Target> {
+  if (value instanceof ReturnId) {
+    return f(value) as any
+  } else if (value === null) {
+    return null as any
+  } else if (typeof value === "object") {
+    const obj: any = {}
+    for (const key in value) {
+      obj[key] = mapReturnIds(value[key], f)
+    }
+    return obj
+  } else {
+    return value as any
+  }
+} 
+*/
+
+export enum UpdateType {
+  ADD,
+  UPDATE,
+  DELETE,
+}
+
+export type AddUpdate<T> = {
+  readonly type: UpdateType.ADD;
+  readonly id: Id;
+  readonly value: T;
+};
+
+export type UpdateUpdate<T> = {
+  readonly type: UpdateType.UPDATE;
+  readonly id: Id;
+  readonly oldValue: T;
+  readonly newValue: T;
+};
+
+export type DeleteUpdate<T> = {
+  readonly type: UpdateType.DELETE;
+  readonly id: Id; 
+  readonly oldValue: T;
+};
+
+export type Update<T> = AddUpdate<T> | UpdateUpdate<T> | DeleteUpdate<T>;
+
+function fmapUpdate<From, To>(f: (a: From) => To, u: Update<From>): Update<To> {
+  switch (u.type) {
+    case UpdateType.ADD:
+      return {
+        type: UpdateType.ADD,
+        id: u.id,
+        value: f(u.value)
+      }
+    case UpdateType.UPDATE:
+      return {
+        type: UpdateType.UPDATE,
+        id: u.id,
+        oldValue: f(u.oldValue),
+        newValue: f(u.newValue)
+      }
+    case UpdateType.DELETE:
+      return {
+        type: UpdateType.DELETE,
+        id: u.id,
+        oldValue: f(u.oldValue)
+      }
+  }
+} 

@@ -1,9 +1,11 @@
 import { strict as assert } from "node:assert";
 import test from "node:test";
-import { Collection, Item, UpdateType } from "./Collection";
-import { sumIndex, btreeIndex } from "./indexes";
+import { Collection } from "./Collection";
+import { sumIndex, btreeIndex } from "../indexes";
 import Long from "long";
-import { MockIndex } from "./test_util/MockIndex";
+import { MockIndex } from "../test_util/MockIndex";
+import { Item } from "./Index";
+import { UpdateType } from "./Update";
 
 test("Collection", async (t) => {
   await test("simple", () => {
@@ -37,19 +39,19 @@ test("Collection", async (t) => {
     const c = new Collection<number>();
     const ix1 = c.add(1);
     const sum = c.registerIndex(sumIndex());
-    assert.strictEqual(sum.result(), 1);
+    assert.strictEqual(sum.value(), 1);
 
     c.add(2);
-    assert.strictEqual(sum.result(), 3);
+    assert.strictEqual(sum.value(), 3);
 
     c.delete(ix1);
-    assert.strictEqual(sum.result(), 2);
+    assert.strictEqual(sum.value(), 2);
 
     const ix2 = c.add(5);
-    assert.strictEqual(sum.result(), 7);
+    assert.strictEqual(sum.value(), 7);
 
     c.set(ix2, 6);
-    assert.strictEqual(sum.result(), 8);
+    assert.strictEqual(sum.value(), 8);
   });
 
   await test("multiple indexes", () => {
@@ -65,7 +67,7 @@ test("Collection", async (t) => {
     c.add(9);
     c.add(8);
 
-    assert.deepEqual(ix1.result(), 33);
+    assert.deepEqual(ix1.value(), 33);
     assert.deepEqual(ix2.max1(), new Item(maxId, 10));
   });
 

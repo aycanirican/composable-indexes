@@ -1,21 +1,20 @@
-import {
-  Index,
-  IndexContext,
-  UnregisteredIndex,
-  Update,
-  UpdateType,
-} from "../Collection";
+import { IndexContext } from "../core/Index";
+import { Update, UpdateType } from "../core/Update";
 import { unreachable } from "../util";
-import { FocusedIndex, focus } from "./FocusedIndex";
+import { AggregateIndex, UnregisteredAggregateIndex } from "./AggregateIndex";
 
-export class FoldIndex<In, State, Return> extends Index<In, any> {
+class FoldIndex<In, State, Return> extends AggregateIndex<In, Return> {
   private state: State;
 
   private constructor(
     ctx: IndexContext<any>,
     init: State,
     private readonly add: (state: State, value: In) => State,
-    private readonly update: (state: State, oldValue: In, newValue: In) => State,
+    private readonly update: (
+      state: State,
+      oldValue: In,
+      newValue: In
+    ) => State,
     private readonly del: (state: State, oldValue: In) => State,
     private readonly ret: (state: State) => Return
   ) {
@@ -29,16 +28,18 @@ export class FoldIndex<In, State, Return> extends Index<In, any> {
     update: (state: State, oldValue: In, newValue: In) => State;
     delete: (state: State, oldValue: In) => State;
     result: (state: State) => Return;
-  }): UnregisteredIndex<In, any, FoldIndex<In, State, Return>> {
-    return (ctx) =>
-      new FoldIndex(
-        ctx,
-        args.init,
-        args.add,
-        args.update,
-        args.delete,
-        args.result
-      );
+  }): UnregisteredAggregateIndex<In, Return> {
+    return new UnregisteredAggregateIndex(
+      (ctx) =>
+        new FoldIndex(
+          ctx,
+          args.init,
+          args.add,
+          args.update,
+          args.delete,
+          args.result
+        )
+    );
   }
 
   _onUpdate(update: Update<In>): () => void {
@@ -55,74 +56,66 @@ export class FoldIndex<In, State, Return> extends Index<In, any> {
     };
   }
 
-  result(): Return {
+  override value(): Return {
     return this.ret(this.state);
   }
 }
 
-export function foldIndex<In, Out, State, Return>(args: {
+export function foldIndex<In, State, Return>(args: {
   init: State;
   add: (state: State, value: In) => State;
   update: (state: State, oldValue: In, newValue: In) => State;
   delete: (state: State, oldValue: In) => State;
   result: (state: State) => Return;
-}): UnregisteredIndex<In, Out, FoldIndex<In, State, Return>> {
+}): UnregisteredAggregateIndex<In, Return> {
   return FoldIndex.create(args);
 }
 
 // Variations
 
-export type GroupIndex<State, Return> = FoldIndex<State, State, Return>; 
-
 export function groupIndex<State, Return>(args: {
   empty: State;
-  mappend: (a: State, b: State) => State;
+  append: (a: State, b: State) => State;
   inverse: (a: State) => State;
   result: (a: State) => Return;
-}): UnregisteredIndex<State, any, GroupIndex<State, Return>> {
+}): UnregisteredAggregateIndex<State, Return> {
   return foldIndex({
     init: args.empty,
-    add: args.mappend,
+    add: args.append,
     update: (state, oldValue, newValue) =>
-      args.mappend(state, args.mappend(args.inverse(oldValue), newValue)),
-    delete: (state, oldValue) => args.mappend(state, args.inverse(oldValue)),
+      args.append(state, args.append(args.inverse(oldValue), newValue)),
+    delete: (state, oldValue) => args.append(state, args.inverse(oldValue)),
     result: args.result,
   });
 }
 
-export type SumIndex = GroupIndex<number, number>
-
-export function sumIndex(): UnregisteredIndex<number, any, SumIndex> {
+export function sumIndex(): UnregisteredAggregateIndex<number, number> {
   return groupIndex({
     empty: 0,
-    mappend: (a, b) => a + b,
+    append: (a, b) => a + b,
     inverse: (a) => -a,
     result: (a) => a,
-  })
+  });
 }
 
-type ArithmeticMeanState = { sum: number; count: number; };
-
-export type ArithmeticMeanIndex = 
-    FocusedIndex<
-        number,
-        any,
-        ArithmeticMeanState,
-        GroupIndex<ArithmeticMeanState, number>
-    >
-
-export function arithmeticMeanIndex(): UnregisteredIndex<
-    number,
-    number,
-    ArithmeticMeanIndex
+export function arithmeticMeanIndex(): UnregisteredAggregateIndex<
+  number,
+  number
 > {
-  return focus(
-    (t: number) => ({ sum: t, count: 1 }),
-    groupIndex({
-        empty: { sum: 0, count: 0 },
-        mappend: (a, b) => ({ sum: a.sum + b.sum, count: a.count + b.count }),
-        inverse: (a) => ({ sum: -a.sum, count: -a.count }),
-        result: (a) => a.sum / a.count,
-    })
-  )
+  return groupIndex({
+    empty: { sum: 0, count: 0 },
+    append: (a, b) => ({ sum: a.sum + b.sum, count: a.count + b.count }),
+    inverse: (a) => ({ sum: -a.sum, count: -a.count }),
+    result: (a) => a.sum / a.count,
+  }).premap((a) => ({ sum: a, count: 1 }));
+}
+
+export function countIndex(): UnregisteredAggregateIndex<any, number> {
+  return foldIndex({
+    init: 0,
+    add: (st) => st + 1,
+    update: (st) => st,
+    delete: (st) => st - 1,
+    result: (st) => st,
+  })
 }

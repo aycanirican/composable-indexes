@@ -17,7 +17,7 @@
   },
   "include": [
       "./src/**/*.ts"
-  ],
+, "src/indexes/FocusedIndex.test.ts.bac"  ],
   "exclude": [
       "./src/**/*.test.ts",
       "node_modules"

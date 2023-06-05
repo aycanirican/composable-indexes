@@ -1,11 +1,8 @@
 import Long from "long";
-import { LongMap } from "./util/LongMap";
-
-export type Id = Long;
-
-export interface Store<T> {
-    get(id: Id): T | undefined
-}
+import { LongMap } from "../util/LongMap";
+import { Update, UpdateType } from "./Update";
+import { Id } from "..";
+import { Index, IndexContext, UnregisteredIndex } from "./Index";
 
 export class Collection<T> {
   private last: Id = Long.UZERO;
@@ -13,9 +10,9 @@ export class Collection<T> {
 
   private indexes: Index<T, T>[] = [];
 
-  registerIndex<Ix extends Index<T, T>>(mkIndex: UnregisteredIndex<T, T, Ix>): Ix {
+  registerIndex<Ix extends Index<T, T>>(uIndex: UnregisteredIndex<T, T, Ix>): Ix {
     const ctx = new IndexContext(this.store);
-    const index = mkIndex(ctx);
+    const index = uIndex._register(ctx);
     this.store.forEach((elem, id) => {
       index._onUpdate({
         type: UpdateType.ADD,
@@ -135,55 +132,6 @@ export class Collection<T> {
     }
   }
 }
-
-export enum UpdateType {
-  ADD,
-  UPDATE,
-  DELETE,
-}
-
-export type AddUpdate<T> = {
-  readonly type: UpdateType.ADD;
-  readonly id: Id;
-  readonly value: T;
-};
-
-export type UpdateUpdate<T> = {
-  readonly type: UpdateType.UPDATE;
-  readonly id: Id;
-  readonly oldValue: T;
-  readonly newValue: T;
-};
-
-export type DeleteUpdate<T> = {
-  readonly type: UpdateType.DELETE;
-  readonly id: Id; 
-  readonly oldValue: T;
-};
-
-export type Update<T> = AddUpdate<T> | UpdateUpdate<T> | DeleteUpdate<T>;
-
-export abstract class Index<In, Out> {
-  protected constructor(readonly indexContext: IndexContext<Out>) {}
-  abstract _onUpdate(update: Update<In>): () => void;
-
-  protected item(id: Long): Item<Out> {
-    return new Item(id, this.indexContext.store.get(id)!);
-  }
-}
-
-export class Item<T> {
-  constructor(
-    readonly id: Id,
-    readonly value: T,
-  ) {}
-}
-
-export class IndexContext<Out> {
-  constructor(readonly store: Store<Out>) {}
-}
-
-export type UnregisteredIndex<In, Out, Ix extends Index<In, Out>> = (ctx: IndexContext<Out>) => Ix
 
 // Utils
 

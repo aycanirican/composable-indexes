@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
-import { Collection, Id } from "../Collection";
+import { Collection } from "../core/Collection";
+import { Id } from "../core/Index";
 import { arbId } from "./arbitraries";
 
 export type Call<T> =

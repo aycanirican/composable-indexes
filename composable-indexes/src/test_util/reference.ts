@@ -1,5 +1,6 @@
 import fc from "fast-check";
-import { Collection, Index, Item, UnregisteredIndex } from "../Collection";
+import { Collection } from "../core/Collection";
+import { Index, Item, UnregisteredIndex } from "../core/Index";
 import { Call, arbCalls, playCalls } from "./call";
 import { deepStrictEqual } from "assert";
 import { MockIndex } from "./MockIndex";

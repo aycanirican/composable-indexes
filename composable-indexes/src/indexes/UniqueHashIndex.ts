@@ -1,13 +1,11 @@
+import { ConflictException, Id } from "..";
 import {
-  ConflictException,
-  Id,
   Index,
   IndexContext,
-  Item,
   UnregisteredIndex,
-  Update,
-  UpdateType,
-} from "../Collection";
+} from "../core/Index";
+import { Update, UpdateType } from "../core/Update";
+import { Item } from "../core/simple_types";
 import { unreachable } from "../util";
 
 export class UniqueHashIndex<In extends number | string, Out> extends Index<
@@ -25,7 +23,7 @@ export class UniqueHashIndex<In extends number | string, Out> extends Index<
     O,
     UniqueHashIndex<T, O>
   > {
-    return (ctx) => new UniqueHashIndex(ctx);
+    return new UnregisteredIndex((ctx) => new UniqueHashIndex(ctx));
   }
 
   _onUpdate(update: Update<In>): () => void {

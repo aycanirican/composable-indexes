@@ -1,8 +1,14 @@
 export {
-  Id,
   Collection,
   ConflictException,
   ConditionFailedException,
-} from "./Collection";
+} from "./core/Collection";
+export {
+  Index,
+} from "./core/Index";
+export {
+  Id,
+  Item,
+} from "./core/simple_types";
 
 export * from "./indexes";

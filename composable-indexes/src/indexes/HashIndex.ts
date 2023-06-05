@@ -1,12 +1,11 @@
+import { Id } from "..";
 import {
-  Id,
   Index,
   IndexContext,
-  Item,
   UnregisteredIndex,
-  Update,
-  UpdateType,
-} from "../Collection";
+} from "../core/Index";
+import { Update, UpdateType } from "../core/Update";
+import { Item } from "../core/simple_types";
 import { LongSet, unreachable } from "../util";
  
 export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
@@ -17,7 +16,7 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   }
 
   static create<T extends number | string, O>(): UnregisteredIndex<T, O, HashIndex<T, O>> {
-    return (ctx) => new HashIndex(ctx);
+    return new UnregisteredIndex((ctx) => new HashIndex(ctx));
   }
 
   _onUpdate(update: Update<In>): () => void {

@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
-import { Id } from "../Collection";
 import Long from "long";
+import { Id } from "../core/simple_types";
 
 export function arbId(range: number): fc.Arbitrary<Id> {
   return fc

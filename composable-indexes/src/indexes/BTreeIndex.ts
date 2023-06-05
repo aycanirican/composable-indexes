@@ -1,11 +1,10 @@
+import { Id } from "..";
 import {
-  Id,
   Index,
-  Item,
   UnregisteredIndex,
-  Update,
-  UpdateType,
-} from "../Collection";
+} from "../core/Index";
+import { Update, UpdateType } from "../core/Update";
+import { Item } from "../core/simple_types";
 import { LongSet, unreachable } from "../util";
 import BTree from "sorted-btree";
 
@@ -13,7 +12,7 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   private readonly ix = new BTree<number | string, LongSet>();
 
   static create<In extends number | string, Out>(): UnregisteredIndex<In, Out, BTreeIndex<In, Out>> {
-    return (ctx) => new BTreeIndex(ctx);
+    return new UnregisteredIndex((ctx) => new BTreeIndex(ctx));
   }
 
   _onUpdate(update: Update<In>): () => void {
