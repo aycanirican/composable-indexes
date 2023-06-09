@@ -1,5 +1,5 @@
 import test from "node:test";
-import { FocusedIndex, GroupedIndex, group, focus } from "./Index";
+import { PremapIndex, GroupedIndex, group, premap } from "./Index";
 import { HashIndex, hashIndex } from "../indexes/HashIndex";
 import fc from "fast-check";
 import { propIndexAgainstReference } from "../test_util/reference";
@@ -32,20 +32,20 @@ test("Index", async () => {
     });
   });
 
-  await test("FocusedIndex", async () => {
+  await test("PremapIndex", async () => {
     await test("ref", () => {
       fc.assert(
         propIndexAgainstReference<
           Foo,
-          FocusedIndex<Foo, Foo, number, HashIndex<number, Foo>>,
+          PremapIndex<Foo, Foo, number, HashIndex<number, Foo>>,
           number
         >({
           valueGen: fc.record({
             bar: fc.integer(),
             baz: fc.integer(),
           }),
-          index: focus((i) => i.bar, hashIndex()),
-          value: (ix) => ix.focused.countDistinct(),
+          index: premap((i) => i.bar, hashIndex()),
+          value: (ix) => ix.mapped.countDistinct(),
           reference: (arr) => new Set(arr.map((i) => i.value.bar)).size,
         }),
         {

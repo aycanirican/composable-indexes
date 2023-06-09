@@ -21,10 +21,10 @@ export class IndexContext<Out> {
 
 export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
   constructor(readonly _register: (ctx: IndexContext<Out>) => Ix) {}
-  focus<NewIn>(
+  рremap<NewIn>(
     f: (x: NewIn) => In
-  ): UnregisteredIndex<NewIn, Out, FocusedIndex<NewIn, Out, In, Ix>> {
-    return FocusedIndex.create(f, this);
+  ): UnregisteredIndex<NewIn, Out, PremapIndex<NewIn, Out, In, Ix>> {
+    return PremapIndex.create(f, this);
   }
 
   group<Group extends string | number>(
@@ -34,11 +34,11 @@ export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
   }
 }
 
-export function focus<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
+export function premap<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
     f: (_: In) => InnerIn,
     inner: UnregisteredIndex<InnerIn, Out, Inner>
-): UnregisteredIndex<In, Out, FocusedIndex<In, Out, InnerIn, Inner>> {
-    return inner.focus(f)
+): UnregisteredIndex<In, Out, PremapIndex<In, Out, InnerIn, Inner>> {
+    return inner.рremap(f)
 }
 
 export function group<In, Out, Group extends string | number, Inner extends Index<In, Out>>(
@@ -50,13 +50,13 @@ export function group<In, Out, Group extends string | number, Inner extends Inde
 
 // Focus functionality
 
-export class FocusedIndex<
+export class PremapIndex<
   In,
   Out,
   InnerIn,
   Inner extends Index<InnerIn, Out>
 > extends Index<In, Out> {
-  focused: Inner = this.inner;
+  mapped: Inner = this.inner;
 
   private constructor(
     ctx: IndexContext<Out>,
@@ -69,9 +69,9 @@ export class FocusedIndex<
   static create<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
     f: (_: In) => InnerIn,
     inner: UnregisteredIndex<InnerIn, Out, Inner>
-  ): UnregisteredIndex<In, Out, FocusedIndex<In, Out, InnerIn, Inner>> {
+  ): UnregisteredIndex<In, Out, PremapIndex<In, Out, InnerIn, Inner>> {
     return new UnregisteredIndex((ctx: IndexContext<Out>) => {
-      const ix = new FocusedIndex(ctx, inner._register(ctx), f);
+      const ix = new PremapIndex(ctx, inner._register(ctx), f);
       return ix;
     });
   }
