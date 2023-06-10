@@ -73,10 +73,10 @@ export class UniqueHashIndex<In extends number | string, Out> extends Index<
   }
 }
 
-export function uniqueHashIndex<T extends string | number>(): UnregisteredIndex<
+export function uniqueHashIndex<T extends string | number, Out>(): UnregisteredIndex<
   T,
-  T,
-  UniqueHashIndex<T, T>
+  Out,
+  UniqueHashIndex<T, Out>
 > {
   return UniqueHashIndex.create();
 }

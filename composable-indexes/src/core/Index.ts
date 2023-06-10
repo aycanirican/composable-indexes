@@ -48,7 +48,7 @@ export function group<In, Out, Group extends string | number, Inner extends Inde
     return inner.group(f)
 }
 
-// Focus functionality
+// Premap functionality
 
 export class PremapIndex<
   In,

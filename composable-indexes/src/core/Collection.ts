@@ -84,19 +84,17 @@ export class Collection<T> {
   }
 
   alter<Ret>(id: Id, f: (pre: T | undefined) => [T | undefined, Ret]): Ret {
-    const pre = this.store.get(id);
-
+    const pre = this.get(id);
     if(pre) {
-      this.store.delete(id)
+      this.delete(id)
     }
 
     const [post, ret] = f(pre);
-
     if(post) {  
       this.set(id, post)
       // TODO: Set function does another existence check, which is unnecessary
     }
-
+    
     return ret
   }
 
