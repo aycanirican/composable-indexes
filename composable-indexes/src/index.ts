@@ -5,6 +5,7 @@ export {
 } from "./core/Collection";
 export {
   Index,
+  UnregisteredIndex,
   premap,
   group,
 } from "./core/Index";

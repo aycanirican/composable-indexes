@@ -138,7 +138,7 @@ export class ConflictException<Out, Ix extends Index<any, Out>> extends Error {
 
   constructor(readonly existingId: Id, readonly index: Ix) {
     super(`composable-indexes: Conflict with existing id ${existingId}`);
-    this.existingValue = index.indexContext.store.get(existingId)!;
+    this.existingValue = index._indexContext.store.get(existingId)!;
   }
 }
 

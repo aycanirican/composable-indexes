@@ -5,11 +5,18 @@ import { Id, Item, Store } from "./simple_types";
 export {Id, Item, Store}
 
 export abstract class Index<In, Out> {
-  protected constructor(readonly indexContext: IndexContext<Out>) {}
+  /** @internal */
+  readonly _indexContext: IndexContext<Out>;
+
+  protected constructor(ctx: IndexContext<Out>) {
+    this._indexContext = ctx;
+  }
+
+  /** @internal */
   abstract _onUpdate(update: Update<In>): () => void;
 
   protected item(id: Id): Item<Out> {
-    return new Item(id, this.indexContext.store.get(id)!);
+    return new Item(id, this._indexContext.store.get(id)!);
   }
 }
 
@@ -20,7 +27,14 @@ export class IndexContext<Out> {
 }
 
 export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
-  constructor(readonly _register: (ctx: IndexContext<Out>) => Ix) {}
+  /** @internal */
+  readonly _register: (ctx: IndexContext<Out>) => Ix;
+
+  /** @internal */
+  constructor(_register: (ctx: IndexContext<Out>) => Ix) {
+    this._register = _register;
+  }
+
   рremap<NewIn>(
     f: (x: NewIn) => In
   ): UnregisteredIndex<NewIn, Out, PremapIndex<NewIn, Out, In, Ix>> {

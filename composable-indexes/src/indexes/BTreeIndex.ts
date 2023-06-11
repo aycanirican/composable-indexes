@@ -8,6 +8,7 @@ import { Item } from "../core/simple_types";
 import { LongSet, unreachable } from "../util";
 import BTree from "sorted-btree";
 
+/** @group indexes */
 export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> {
   private readonly ix = new BTree<number | string, LongSet>();
 
@@ -39,6 +40,8 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   }
 
   private update(id: Id, oldValue: In, newValue: In): void {
+    if(oldValue === newValue) return
+
     // TODO: Lot's of redundant checks here, implement this more efficiently.
     this.delete(id, oldValue);
     this.add(id, newValue);
