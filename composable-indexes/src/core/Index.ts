@@ -1,5 +1,5 @@
 import { unreachable } from "../util";
-import { AddUpdate, DeleteUpdate, Update, UpdateType, UpdateUpdate, mapUpdate } from "./Update";
+import { AddUpdate, DeleteUpdate, Update, UpdateType, UpdateUpdate, filterMapUpdate } from "./Update";
 import { Id, Item, Store } from "./simple_types";
 
 export {Id, Item, Store}
@@ -36,7 +36,7 @@ export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
   }
 
   рremap<NewIn>(
-    f: (x: NewIn) => In
+    f: (x: NewIn) => In | undefined
   ): UnregisteredIndex<NewIn, Out, PremapIndex<NewIn, Out, In, Ix>> {
     return PremapIndex.create(f, this);
   }
@@ -49,7 +49,7 @@ export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
 }
 
 export function premap<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
-    f: (_: In) => InnerIn,
+    f: (_: In) => InnerIn | undefined,
     inner: UnregisteredIndex<InnerIn, Out, Inner>
 ): UnregisteredIndex<In, Out, PremapIndex<In, Out, InnerIn, Inner>> {
     return inner.рremap(f)
@@ -70,18 +70,16 @@ export class PremapIndex<
   InnerIn,
   Inner extends Index<InnerIn, Out>
 > extends Index<In, Out> {
-  mapped: Inner = this.inner;
-
   private constructor(
     ctx: IndexContext<Out>,
     private inner: Inner,
-    private readonly f: (_: In) => InnerIn
+    private readonly f: (_: In) => InnerIn | undefined
   ) {
     super(ctx);
   }
 
   static create<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
-    f: (_: In) => InnerIn,
+    f: (_: In) => InnerIn | undefined,
     inner: UnregisteredIndex<InnerIn, Out, Inner>
   ): UnregisteredIndex<In, Out, PremapIndex<In, Out, InnerIn, Inner>> {
     return new UnregisteredIndex((ctx: IndexContext<Out>) => {
@@ -90,8 +88,17 @@ export class PremapIndex<
     });
   }
 
-  _onUpdate(update: Update<In>): () => void {
-    return this.inner._onUpdate(mapUpdate(this.f, update));
+  _onUpdate(update: Update<In>): () => void {    
+    const innerUpdate = filterMapUpdate(this.f, update);
+    if (innerUpdate) {
+      return this.inner._onUpdate(innerUpdate);
+    } else {
+      return () => {};
+    }
+  }
+
+  get get(): Inner {
+    return this.inner
   }
 }
 
@@ -181,8 +188,11 @@ export class GroupedIndex<In, Out, Group extends string | number, Inner extends 
     // TODO: When an index becomes empty, we can delete it.
   }
 
-  where<T>(group: string | number): Inner | undefined {
+  get<T>(group: string | number): Inner | undefined {
     return this.ixs.get(group);
   }
+
+  /** Synonym for 'get' */
+  where = this.get
 }
 

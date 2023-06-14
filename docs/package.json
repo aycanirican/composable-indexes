@@ -1,0 +1,22 @@
+{
+  "name": "composable-indexes-docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "extract": "rm -rf gen/ && mkdir gen && find src -name '*.md' -type f -exec sh -c 'cat {} | codedown typescript > gen/$(basename {}).ts' \\;",
+    "build": "npm run extract && tsc && echo Done."
+  },
+  "keywords": [],
+  "author": "Utku Demir",
+  "license": "ISC",
+  "dependencies": {
+    "composable-indexes": "workspace:*"
+  },
+  "devDependencies": {
+    "codedown": "^2.2.0",
+    "docsify-cli": "^4.4.4",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.3"
+  }
+}

@@ -10,7 +10,7 @@
     "test": "c8 --reporter=none --verbose -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "test:watch": "tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "coverage": "c8 report --reporter html --reporter text",
-    "docs": "typedoc --excludeInternal ./src/index.ts",
+    "docs": "typedoc --excludeInternal ./src/index.ts --out api_docs",
     "prepublish": "npm run build"
   },
   "repository": {
