@@ -35,6 +35,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm install
+      - run: npm run build --workspace core
       - run: npm run docs --workspace core --workspace docs
 
       - name: Setup Pages
