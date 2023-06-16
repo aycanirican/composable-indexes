@@ -1,6 +1,9 @@
 dist
-api_docs
 coverage
+
 gen
+generated_docs
+.docs_reflection.json
 
 node_modules
+.tmp*

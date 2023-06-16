@@ -1,0 +1,24 @@
+name: Test Action
+
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: composable-indexes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm install
+      - run: npm run test --workspaces --if-present
+      - run: npm run coverage

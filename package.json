@@ -1,5 +1,9 @@
 {
-	"devDependencies": {
-		"codedown": "^2.2.0"
-	}
+	"name": "composable-indexes-root",
+	"packageManager": "yarn@3.6.0",
+	"private": true,
+	"workspaces": [
+		"core",
+		"docs"
+	]
 }

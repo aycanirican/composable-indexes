@@ -1,22 +1,25 @@
 {
   "name": "composable-indexes-docs",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "extract": "rm -rf gen/ && mkdir gen && find src -name '*.md' -type f -exec sh -c 'cat {} | codedown typescript > gen/$(basename {}).ts' \\;",
-    "build": "npm run extract && tsc && echo Done."
+    "generate": "node generate.js",
+    "local_reflection": "typedoc --json gen/typedoc/.docs_reflection.json --emit docs ./gen/typedoc/*.ts",
+    "typecheck": "tsc",
+    "docs": "npm run generate && npm run typecheck && npm run local_reflection && typedoc --entryPointStrategy merge gen/typedoc/.docs_reflection.json ../core/.docs_reflection.json --out gen/docs"
   },
   "keywords": [],
   "author": "Utku Demir",
   "license": "ISC",
   "dependencies": {
-    "composable-indexes": "workspace:*"
+    "composable-indexes": "*"
   },
   "devDependencies": {
     "codedown": "^2.2.0",
-    "docsify-cli": "^4.4.4",
     "prettier": "^2.8.8",
+    "typedoc-plugin-merge-modules": "^5.0.1",
     "typescript": "^5.1.3"
   }
 }
