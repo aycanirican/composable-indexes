@@ -16,11 +16,10 @@
     "build": "rm -rf dist && tsc && npm run docs",
     "test": "c8 --reporter=none --verbose -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "test:watch": "tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
-    "coverage": "c8 report --reporter html --reporter text",
+    "coverage": "c8 report --reporter html --reporter text --reporter lcov",
     "docs": "typedoc --json ./.docs_reflection.json --emit docs ./src/index.ts --excludeInternal",
     "prepack": "npm run build && cp ../README.md ."
   },
-  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/utdemir/composable-indexes.git"
@@ -47,6 +46,7 @@
     "@types/node": "^20.2.5",
     "@types/shuffle-seed": "^1.1.0",
     "c8": "^7.14.0",
+    "codecov": "^3.8.3",
     "fast-check": "^3.9.0",
     "jsdoc": "^4.0.2",
     "shuffle-seed": "^1.1.6",
