@@ -14,9 +14,9 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc && npm run docs",
-    "test": "c8 --reporter=none --verbose -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
+    "test": "c8 --reporter=none --exclude 'src/test_util/*' -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "test:watch": "tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
-    "coverage": "c8 report --reporter html --reporter text --reporter lcov",
+    "coverage": "c8 report --all --src src --exclude 'src/test_util' --exclude 'src/**/*.test.ts' --reporter html --reporter text --reporter lcov",
     "docs": "typedoc --json ./.docs_reflection.json --emit docs ./src/index.ts --excludeInternal",
     "prepack": "npm run build && cp ../README.md ."
   },
