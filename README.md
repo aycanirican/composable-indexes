@@ -2,6 +2,8 @@
 
 [![tests](https://github.com/utdemir/composable-indexes/actions/workflows/build_and_test.yaml/badge.svg)](https://github.com/utdemir/composable-indexes/actions/workflows/build_and_test.yaml?query=branch%3Amain)
 [![documentation](https://img.shields.io/badge/documentation-available-blue)](https://utdemir.github.io/composable-indexes)
+[![npm](https://img.shields.io/npm/v/composable-indexes)](https://www.npmjs.com/package/composable-indexes)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/composable-indexes)](https://bundlephobia.com/result?p=composable-indexes)
 
 Index arbitrary JavaScript objects with multiple dimensions. Build on top of included indexes and combinators, or extend the library with your own index.
 
