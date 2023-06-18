@@ -5,7 +5,8 @@ command line application.
 There are many options for storing state. `composable-index` is one of them, and
 it is useful when:
 
-* Your data fits in memory, and do not need to persist it (or another
+* Your data fits in memory, and do not need to persist it (or have another mechanism
+  for persisting it).
 * You want a thin layer to represent your data and queries as plain JavaScript
   persistence mechanism).
   objects.
