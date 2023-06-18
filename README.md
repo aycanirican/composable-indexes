@@ -1,7 +1,7 @@
 # composable-indexes
 
 [![tests](https://github.com/utdemir/composable-indexes/actions/workflows/build_and_test.yaml/badge.svg)](https://github.com/utdemir/composable-indexes/actions/workflows/build_and_test.yaml?query=branch%3Amain)
-[![documentation](https://img.shields.io/badge/Documentation-available-blue)](https://utdemir.github.io/composable-indexes)
+[![documentation](https://img.shields.io/badge/documentation-available-blue)](https://utdemir.github.io/composable-indexes)
 
 Index arbitrary JavaScript objects with multiple dimensions. Build on top of included indexes and combinators, or extend the library with your own index.
 
