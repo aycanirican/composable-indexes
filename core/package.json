@@ -1,17 +1,23 @@
 {
   "name": "composable-indexes",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Flexible in-memory document database-like manual index management",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
   "module": "commonjs",
+  "files": [
+    "dist/**/*",
+    "src/**/*.ts",
+    "package.json",
+    "README.md"
+  ],
   "scripts": {
-    "build": "tsc && npm run docs",
+    "build": "rm -rf dist && tsc && npm run docs",
     "test": "c8 --reporter=none --verbose -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "test:watch": "tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "coverage": "c8 report --reporter html --reporter text",
     "docs": "typedoc --json ./.docs_reflection.json --emit docs ./src/index.ts --excludeInternal",
-    "prepublish": "npm run build"
+    "prepack": "npm run build && cp ../README.md ."
   },
   
   "repository": {
