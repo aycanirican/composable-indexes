@@ -8,6 +8,11 @@ import { Update, UpdateType } from "../core/Update";
 import { Item } from "../core/simple_types";
 import { unreachable } from "../util";
 
+/**
+ * Indexes items using a JavaScript `Map`, and ensures uniqueness.
+ * 
+ * Throws a {@link ConflictException} if a duplicate item is added.
+ */
 export class UniqueHashIndex<In extends number | string, Out> extends Index<
   In,
   Out

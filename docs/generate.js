@@ -43,6 +43,8 @@ function main() {
     fs.rmSync(path.join(genTargetDir, 'typedoc'), { recursive: true, force: true })
     fs.renameSync(genJsdocDir, path.join(genTargetDir, 'typedoc'))
 
+    fs.rmdirSync(tmpdir, { recursive: true })
+
     console.log("Done.")
 }
 

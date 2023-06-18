@@ -6,10 +6,13 @@ import {
 } from "../core/Index";
 import { Update, UpdateType } from "../core/Update";
 import { Item } from "../core/simple_types";
-import { LongSet, unreachable } from "../util";
+import { IdSet, unreachable } from "../util";
  
+/**
+ * Indexes items using a JavaScript `Map`.
+ */
 export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
-  private readonly ix: Map<In, LongSet> = new Map();
+  private readonly ix: Map<In, IdSet> = new Map();
 
   private constructor(ctx: IndexContext<Out>) {
     super(ctx);
@@ -38,7 +41,7 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
     if (set) {
       set.set(id);
     } else {
-      const s = new LongSet();
+      const s = new IdSet();
       s.set(id);
       this.ix.set(value, s);
     }
@@ -67,7 +70,7 @@ export class HashIndex<In extends number | string, Out> extends Index<In, Out> {
   }
 
   // Utils
-  private items(set: LongSet | undefined): Item<Out>[] {
+  private items(set: IdSet | undefined): Item<Out>[] {
     const ret: Item<Out>[] = [];
 
     if (!set) return ret;

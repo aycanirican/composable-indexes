@@ -1,5 +1,5 @@
-import { Id, Index, Item, UnregisteredIndex } from "../core/Index"
-
+import { Index, UnregisteredIndex } from "../core/Index"
+import { Id, Item } from "../core/simple_types"
 import { inspect } from "node:util"
 import { Update, UpdateType } from "../core/Update"
 
@@ -43,7 +43,7 @@ export class MockIndex<In, Out> extends Index<In, Out> {
     }
 
     get(id: Id): Out | undefined {
-        return this._indexContext.store.get(id)
+        return this._indexContext.get(id)
     }
 
     toInList(): Item<In>[] {

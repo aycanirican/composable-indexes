@@ -1,7 +1,9 @@
 {
 	"name": "composable-indexes-root",
-	"packageManager": "yarn@3.6.0",
 	"private": true,
+	"scripts": {
+		"docs": "npm run docs -w core -w docs"
+	},
 	"workspaces": [
 		"core",
 		"docs"

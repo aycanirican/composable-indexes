@@ -5,17 +5,27 @@ import {
 } from "../core/Index";
 import { Update, UpdateType } from "../core/Update";
 import { Item } from "../core/simple_types";
-import { LongSet, unreachable } from "../util";
+import { IdSet, unreachable } from "../util";
 import BTree from "sorted-btree";
 
-/** @group indexes */
+/** 
+ * An index backed by a `BTree` (from the `sorted-btree` package).
+ * 
+ * Stores the elements in a sorted order, and allows efficient queries for
+ * equality, range and max/min.
+ * 
+ * Memory footprint: `O(n * log(n))`
+ * 
+ * @group indexes 
+ */
 export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> {
-  private readonly ix = new BTree<number | string, LongSet>();
+  private readonly ix = new BTree<number | string, IdSet>();
 
   static create<In extends number | string, Out>(): UnregisteredIndex<In, Out, BTreeIndex<In, Out>> {
     return new UnregisteredIndex((ctx) => new BTreeIndex(ctx));
   }
 
+  /** @internal */
   _onUpdate(update: Update<In>): () => void {
     return () => {
       if (update.type === UpdateType.ADD) {
@@ -35,7 +45,7 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
     if (set !== undefined) {
       set.set(id);
     } else {
-      this.ix.set(value, LongSet.singleton(id));
+      this.ix.set(value, IdSet.singleton(id));
     }
   }
 
@@ -56,26 +66,48 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   }
 
   // Queries
+
+  /** 
+   * Complexity: `O(1)`
+   */
   countDistinct(): number {
     return this.ix.size;
   }
 
+  /**
+   * Complexity: `O(log(n))`
+   */
   eq(value: In): Item<Out>[] {
     return this.items(this.ix.get(value))
   }
 
+  /**
+   * Returns all items that has the maximum value.
+   * 
+   * Complexity: `O(log(n) + m)`
+   *   where `m` is the number of items fetched
+   */
   max(): Item<Out>[] {
     const maxKey = this.ix.maxKey();
     if(maxKey === undefined) return []
     return this.items(this.ix.get(maxKey))
   }
 
+  /**
+   * Returns all items that has the minimum value.
+   * 
+   * Complexity: `O(log(n) + m)`
+   *   where `m` is the number of items fetched
+   */
   min(): Item<Out>[] {
     const minKey = this.ix.minKey();
     if(minKey === undefined) return []
     return this.items(this.ix.get(minKey))
   }
 
+  /**
+   * Complexity: `O(log(n))`
+   */
   max1(): Item<Out> | undefined {
     const maxKey = this.ix.maxKey();
     if(maxKey === undefined) return
@@ -85,6 +117,9 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
     }
   }
 
+  /**
+   * Complexity: `O(log(n))`
+   */
   min1(): Item<Out> | undefined {
     const minKey = this.ix.minKey();
     if(minKey === undefined) return
@@ -94,6 +129,12 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
     }
   }
 
+  /**
+   * Returns at most `limit` items that is between `minValue` and `maxValue`
+   * (inclusive).
+   * 
+   * Complexity: `O(log(n) + limit)`
+   */
   range(p: { minValue: In; maxValue: In; limit?: number }): Item<Out>[] {
     const { minValue, maxValue, limit } = p;
     const values = this.ix.getRange(minValue, maxValue, true, limit);
@@ -109,7 +150,7 @@ export class BTreeIndex<In extends number | string, Out> extends Index<In, Out> 
   }
 
   // utils
-  private items(set: LongSet | undefined): Item<Out>[] {
+  private items(set: IdSet | undefined): Item<Out>[] {
     const ret: Item<Out>[] = [];
 
     if(!set) return ret;

@@ -4,8 +4,8 @@ import { Collection } from "./Collection";
 import { sumIndex, btreeIndex } from "../indexes";
 import Long from "long";
 import { MockIndex } from "../test_util/MockIndex";
-import { Item } from "./Index";
 import { UpdateType } from "./Update";
+import { Id, Item } from "./simple_types";
 
 test("Collection", async (t) => {
   await test("simple", () => {
@@ -78,14 +78,14 @@ test("Collection", async (t) => {
     c.add(1);
 
     assert.deepEqual(ix.collectedUpdates, [
-      { type: UpdateType.ADD, id: Long.fromNumber(1, true), value: 1 },
+      { type: UpdateType.ADD, id: Id.fromLong(Long.fromNumber(1, true)), value: 1 },
     ]);
 
     c.add(2);
 
     assert.deepEqual(ix.collectedUpdates, [
-      { type: UpdateType.ADD, id: Long.fromNumber(1, true), value: 1 },
-      { type: UpdateType.ADD, id: Long.fromNumber(2, true), value: 2 },
+      { type: UpdateType.ADD, id: Id.fromLong(Long.fromNumber(1, true)), value: 1 },
+      { type: UpdateType.ADD, id: Id.fromLong(Long.fromNumber(2, true)), value: 2 },
     ]);
   });
 
@@ -93,7 +93,7 @@ test("Collection", async (t) => {
     const c = new Collection<number>();
     const ix = c.registerIndex(MockIndex.create());
 
-    const id = Long.fromNumber(1, true);
+    const id = Id.fromLong(Long.fromNumber(1, true));
 
     c.set(id, 1);
     c.set(id, 2);
@@ -117,7 +117,7 @@ test("Collection", async (t) => {
     ]);
 
     // Deleting a non-existent item doesn't change anything
-    c.delete(Long.fromNumber(666));
+    c.delete(Id.fromLong(Long.fromNumber(666)));
     assert.deepEqual(ix.collectedUpdates, [
       { type: UpdateType.ADD, id, value: 1 },
       { type: UpdateType.DELETE, id, oldValue: 1 },

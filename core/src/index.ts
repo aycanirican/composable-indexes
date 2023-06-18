@@ -1,5 +1,5 @@
 /**
- * @module API Documentation
+ * @module ./
  */
 
 export {
@@ -10,12 +10,11 @@ export {
 export {
   Index,
   UnregisteredIndex,
-  premap,
   group,
+  premap,
 } from "./core/Index";
 export {
   Id,
   Item,
 } from "./core/simple_types";
-
 export * from "./indexes";

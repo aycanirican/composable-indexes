@@ -1,9 +1,10 @@
 import fc from "fast-check";
 import { Collection } from "../core/Collection";
-import { Index, Item, UnregisteredIndex } from "../core/Index";
+import { Index, UnregisteredIndex } from "../core/Index";
 import { Call, arbCalls, playCalls } from "./call";
 import { deepStrictEqual } from "assert";
 import { MockIndex } from "./MockIndex";
+import { Item } from "../core/simple_types";
 
 export function propIndexAgainstReference<
   T,

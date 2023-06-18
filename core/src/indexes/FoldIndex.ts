@@ -3,7 +3,15 @@ import { Update, UpdateType } from "../core/Update";
 import { unreachable } from "../util";
 import { AggregateIndex, UnregisteredAggregateIndex } from "./AggregateIndex";
 
-class FoldIndex<In, State, Return> extends AggregateIndex<In, Return> {
+/**
+ * An aggregate index that folds over the change events it receives.
+ * 
+ * The time and memory complexity of this index completely depends on the
+ * complexities of the functions passed to it.
+ * 
+ * @see {@link foldIndex} as a constructor.
+ */
+export class FoldIndex<In, State, Return> extends AggregateIndex<In, Return> {
   private state: State;
 
   private constructor(
@@ -61,6 +69,9 @@ class FoldIndex<In, State, Return> extends AggregateIndex<In, Return> {
   }
 }
 
+/**
+ * Create a new {@link FoldIndex}.
+ */
 export function foldIndex<In, State, Return>(args: {
   init: State;
   add: (state: State, value: In) => State;
@@ -73,7 +84,14 @@ export function foldIndex<In, State, Return>(args: {
 
 // Variations
 
-export function groupIndex<State, Return>(args: {
+/**
+ * If the index forms an algebraic group, return the result of 
+ * `append`ing all values.
+ * 
+ * Assuming `O(1)` `append` and `inverse`, this index has `O(1)`
+ * memory and time complexity for queries and updates.
+ */
+export function algebraicGroupIndex<State, Return>(args: {
   empty: State;
   append: (a: State, b: State) => State;
   inverse: (a: State) => State;
@@ -89,8 +107,13 @@ export function groupIndex<State, Return>(args: {
   });
 }
 
+/**
+ * An aggregate index for calculating the sum.
+ * 
+ * `O(1)` query, update, and memory complexity.
+ */
 export function sumIndex(): UnregisteredAggregateIndex<number, number> {
-  return groupIndex({
+  return algebraicGroupIndex({
     empty: 0,
     append: (a, b) => a + b,
     inverse: (a) => -a,
@@ -98,11 +121,16 @@ export function sumIndex(): UnregisteredAggregateIndex<number, number> {
   });
 }
 
+/**
+ * An aggregate index for calculating the arithmetic mean.
+ * 
+ * `O(1)` query, update, and memory complexity.
+ */
 export function arithmeticMeanIndex(): UnregisteredAggregateIndex<
   number,
   number
 > {
-  return groupIndex({
+  return algebraicGroupIndex({
     empty: { sum: 0, count: 0 },
     append: (a, b) => ({ sum: a.sum + b.sum, count: a.count + b.count }),
     inverse: (a) => ({ sum: -a.sum, count: -a.count }),
@@ -110,6 +138,11 @@ export function arithmeticMeanIndex(): UnregisteredAggregateIndex<
   }).premap((a) => ({ sum: a, count: 1 }));
 }
 
+/**
+ * An aggregate index for calculating the number of values.
+ * 
+ * `O(1)` query, update, and memory complexity.
+ */
 export function countIndex(): UnregisteredAggregateIndex<any, number> {
   return foldIndex({
     init: 0,

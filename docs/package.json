@@ -5,10 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "generate": "node generate.js",
+    "generate": "node generate.js && tsc",
     "local_reflection": "typedoc --json gen/typedoc/.docs_reflection.json --emit docs ./gen/typedoc/*.ts",
-    "typecheck": "tsc",
-    "docs": "npm run generate && npm run typecheck && npm run local_reflection && typedoc --entryPointStrategy merge gen/typedoc/.docs_reflection.json ../core/.docs_reflection.json --out gen/docs"
+    "combine_docs": "typedoc --entryPointStrategy merge gen/typedoc/.docs_reflection.json ../core/.docs_reflection.json --out gen/docs --excludeInternal",
+    "docs": "npm run generate && npm run local_reflection && npm run combine_docs"
   },
   "keywords": [],
   "author": "Utku Demir",

@@ -2,17 +2,18 @@
   "name": "composable-indexes",
   "version": "0.0.1",
   "description": "Flexible in-memory document database-like manual index management",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "types": "dist/index.d.ts",
   "module": "commonjs",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run docs",
     "test": "c8 --reporter=none --verbose -- tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "test:watch": "tsx --no-warnings --test-reporter spec --test src/**/*.test.ts",
     "coverage": "c8 report --reporter html --reporter text",
-    "docs": "typedoc --json ./.docs_reflection.json --emit docs ./src/index.ts",
+    "docs": "typedoc --json ./.docs_reflection.json --emit docs ./src/index.ts --excludeInternal",
     "prepublish": "npm run build"
   },
+  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/utdemir/composable-indexes.git"

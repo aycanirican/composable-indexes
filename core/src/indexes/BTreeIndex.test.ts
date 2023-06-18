@@ -2,8 +2,8 @@ import test from "node:test";
 import { BTreeIndex, btreeIndex } from "./BTreeIndex";
 import fc from "fast-check";
 import { propIndexAgainstReference } from "../test_util/reference";
-import { Item } from "../core/Index";
 import { testProps } from "../test_util/invariants";
+import { Item } from "../core/simple_types";
 
 test("BTreeIndex", async (t) => {
   await test("ref.eq", () => {

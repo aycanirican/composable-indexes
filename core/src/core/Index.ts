@@ -1,8 +1,6 @@
 import { unreachable } from "../util";
 import { AddUpdate, DeleteUpdate, Update, UpdateType, UpdateUpdate, filterMapUpdate } from "./Update";
-import { Id, Item, Store } from "./simple_types";
-
-export {Id, Item, Store}
+import { Id, Item } from "./simple_types";
 
 export abstract class Index<In, Out> {
   /** @internal */
@@ -16,14 +14,14 @@ export abstract class Index<In, Out> {
   abstract _onUpdate(update: Update<In>): () => void;
 
   protected item(id: Id): Item<Out> {
-    return new Item(id, this._indexContext.store.get(id)!);
+    return new Item(id, this._indexContext.get(id)!);
   }
 }
 
 // UnregisteredIndex
 
 export class IndexContext<Out> {
-  constructor(readonly store: Store<Out>) {}
+  constructor(readonly get: (_: Id) => Out | undefined) {}
 }
 
 export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
@@ -34,32 +32,68 @@ export class UnregisteredIndex<In, Out, Ix extends Index<In, Out>> {
   constructor(_register: (ctx: IndexContext<Out>) => Ix) {
     this._register = _register;
   }
-
-  рremap<NewIn>(
-    f: (x: NewIn) => In | undefined
-  ): UnregisteredIndex<NewIn, Out, PremapIndex<NewIn, Out, In, Ix>> {
-    return PremapIndex.create(f, this);
-  }
-
-  group<Group extends string | number>(
-    f: (x: In) => Group
-  ): UnregisteredIndex<In, Out, GroupedIndex<In, Out, Group, Ix>> {
-    return GroupedIndex.create(f, this);
-  }
 }
 
+/**
+ * Passes inputs through a function before handing them to the given index.
+ * If the function returns `undefined`, the input is ignored.
+ * 
+ * @example
+ * ```typescript
+ * const collection = new Collection<Readonly<{
+ *   name: string,
+ *   age: number,
+ * }>>();
+ * 
+ * // Ensure all names are unique
+ * const ixUniqueNames = collection.registerIndex(
+ *   premap(
+ *     p.name,
+ *     uniqueHashIndex()
+ *   )
+ * );
+ * 
+ * // Maintain the number of adults
+ * const ixAdultCount = collection.registerIndex(
+ *   premap(
+ *     p => p.age >= 18 ? p : undefined,
+ *     countIndex()
+ *   )
+ * );
+ * 
+ * console.log(ixAdultCount.get().value);
+ */
 export function premap<In, Out, InnerIn, Inner extends Index<InnerIn, Out>>(
     f: (_: In) => InnerIn | undefined,
     inner: UnregisteredIndex<InnerIn, Out, Inner>
 ): UnregisteredIndex<In, Out, PremapIndex<In, Out, InnerIn, Inner>> {
-    return inner.рremap(f)
+    return PremapIndex.create(f, inner);
 }
 
+/**
+ * Groups input by a function and maintains a separate index for each group.
+ * 
+ * @example
+ * ```typescript
+ * const collection = new Collection<Readonly<{ 
+ *  name: string,
+ *  team: string,
+ * }>>();
+ * 
+ * const ixTeamSizes = collection.registerIndex(
+ *   group(
+ *     (p) => p.team,
+ *     countIndex()
+ *   )
+ * );
+ * 
+ * console.log(ixTeamSizes.get("Team One")?.value)
+ */
 export function group<In, Out, Group extends string | number, Inner extends Index<In, Out>>(
     f: (_: In) => Group,
     inner: UnregisteredIndex<In, Out, Inner>
 ): UnregisteredIndex<In, Out, GroupedIndex<In, Out, Group, Inner>> {
-    return inner.group(f)
+    return GroupedIndex.create(f, inner);
 }
 
 // Premap functionality

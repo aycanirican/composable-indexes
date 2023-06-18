@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 import { Collection } from "../core/Collection";
-import { Id } from "../core/Index";
+import { Id } from "../core/simple_types";
 import { arbId } from "./arbitraries";
 
 export type Call<T> =
@@ -23,7 +23,7 @@ export function ppCall(call: Call<any>): string {
     case "add":
       return `add(${call.value})`;
     case "set":
-      return `set(${call.id.toString(10)}, ${call.value})`;
+      return `set(${call.id.asLong.toString(10)}, ${call.value})`;
     case "delete":
       return `delete(${call.id})`;
   }
