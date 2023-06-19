@@ -8,7 +8,6 @@ it is useful when:
 * Your data fits in memory, and do not need to persist it (or have another mechanism
   for persisting it).
 * You want a thin layer to represent your data and queries as plain JavaScript
-  persistence mechanism).
   objects.
 * You want to be able to query your data in multiple ways, without having to
   maintain multiple data structures or resort to iteration.
